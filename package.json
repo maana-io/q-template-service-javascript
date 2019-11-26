@@ -11,7 +11,7 @@
     "docker-run": "docker run -p 8050:8050 maana-service",
     "precommit": "lint-staged",
     "prettier": "./node_modules/.bin/prettier --write \"src/**/*.{js,jsx}\"",
-    "start": "babel-node ./src/start.js",
+    "start": "babel-node ./src/start.dev.js",
     "dbg": "nodemon --inspect ./src/start.dev.js --exec babel-node -e js",
     "dev": "nodemon ./src/start.dev.js --exec babel-node -e js"
   },
