@@ -32,6 +32,16 @@ In `package.json`, edit the metadata:
 
 @@TODO
 
+### Authentication
+Authentication is handled against a Maana Q instance using a 'client credentials grant' OAuth flow. 
+The .env.template file contains the variables that must be configured:
+
+- `REACT_APP_PORTAL_AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
+- `REACT_APP_PORTAL_AUTH_DOMAIN` is the HTTP domain for the auth server. When setting this value, it is expected that keycloak domains are prefixed with an `https://`, and Auth0 domains are not, e.g. `maana.auth0.com`.
+- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server. 
+- `REACT_APP_PORTAL_AUTH_CLIENT_SECRET` is the secret that corresponds to the `REACT_APP_PORTAL_AUTH_CLIENT_ID` value.
+- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server. 
+
 ## Deployment
 
 @@TODO

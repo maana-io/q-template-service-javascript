@@ -17,6 +17,8 @@ import { AuthenticationClient } from 'auth0'
 import glue from 'schemaglue'
 import path from 'path'
 import http from 'http'
+import request from 'request-promise-native'
+const querystring = require('querystring');
 
 //
 // Internal imports
@@ -114,7 +116,7 @@ const defaultSocketMiddleware = (connectionParams, webSocket) => {
 initMetrics(SELF.replace(/[\W_]+/g, ''))
 const graphqlRequestCounter = counter('graphqlRequests', 'it counts')
 
-const initServer = options => {
+const initServer = async options => {
   let { httpAuthMiddleware, socketAuthMiddleware } = options
 
   let socketMiddleware = socketAuthMiddleware || defaultSocketMiddleware
@@ -133,30 +135,33 @@ const initServer = options => {
   const httpServer = http.createServer(app)
   server.installSubscriptionHandlers(httpServer)
 
-  httpServer.listen({ port: PORT }, () => {
-    log(SELF).info(
-      `listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`
-    )
+  httpServer.listen({ port: PORT }, async () => {
+    log(SELF).info(`listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`)
 
-    let auth0 = new AuthenticationClient({
-      domain: process.env.REACT_APP_PORTAL_AUTH_DOMAIN,
-      clientId: process.env.REACT_APP_PORTAL_AUTH_CLIENT_ID,
-      clientSecret: process.env.REACT_APP_PORTAL_AUTH_CLIENT_SECRET
-    })
+    // Create OIDC token URL for the specified auth provider (default to auth0).
+    const tokenUri = (process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak')
+      ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
+      : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
 
-    auth0.clientCredentialsGrant(
-      {
-        audience: process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER,
-        scope: 'read:client_grants'
+    const form = {
+      grant_type: 'client_credentials',
+      client_id: process.env.REACT_APP_PORTAL_AUTH_CLIENT_ID,
+      client_secret: process.env.REACT_APP_PORTAL_AUTH_CLIENT_SECRET,
+      audience: process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER
+    }
+    const formData = querystring.stringify(form)
+    const contentLength = formData.length
+    const requestConfig = {
+      headers: {
+        'Content-Length': contentLength,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      function(err, response) {
-        if (err) {
-          console.error('Client was unable to connect', err)
-        }
-
-        clientSetup(response.access_token)
-      }
-    )
+      uri: tokenUri,
+      body: formData,
+      method: 'POST'
+    }
+    const response = JSON.parse(await request(requestConfig))
+    clientSetup(response.access_token)
   })
 }
 
