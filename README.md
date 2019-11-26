@@ -2,7 +2,7 @@
 
 ## Layout
 
-@@TODO
+TODO
 
 ## Customization
 
@@ -26,11 +26,11 @@ In `package.json`, edit the metadata:
 
 ## Build setup
 
-@@TODO
+TODO
 
 ## Server setup
 
-@@TODO
+TODO
 
 ### Authentication
 Authentication is handled against a Maana Q instance using a 'client credentials grant' OAuth flow. 
@@ -44,7 +44,7 @@ The .env.template file contains the variables that must be configured:
 
 ## Deployment
 
-@@TODO
+TODO
 
 ## Logging
 
