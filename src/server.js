@@ -11,8 +11,6 @@ import cors from 'cors'
 import { ApolloServer } from 'apollo-server-express'
 // GraphQL schema compilation
 import { makeExecutableSchema } from 'graphql-tools'
-// Auth0 Authentication client
-import { AuthenticationClient } from 'auth0'
 // Keep GraphQL stuff nicely factored
 import glue from 'schemaglue'
 import path from 'path'
