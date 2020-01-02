@@ -1,4 +1,4 @@
-# Node-based Maana Knowledge Microservice Template
+# NodeJs-based Maana Q Knowledge Microservice Template
 
 ## Layout
 
@@ -12,13 +12,13 @@ In `package.json`, edit the metadata:
 
 ```json
 {
-  "name": "sample",
+  "name": "my-amazing-service",
   "author": "Acme, Inc.",
   "license": "MIT",
   "version": "1.0.0",
-  "description": "Awesome Bot",
+  "description": "My amazing service",
   "main": "src/server.js",
-  "repository": "https://github.com/acme-inc/awesome-bot.git",
+  "repository": "https://github.com/acme-inc/my-amazing-service.git",
 ```
 
 * Edit the `.env` file to reflect proper `PORT`, `SERVICE_ID`, and other service-specific parameters.
@@ -42,9 +42,11 @@ The .env.template file contains the variables that must be configured:
 - `REACT_APP_PORTAL_AUTH_CLIENT_SECRET` is the secret that corresponds to the `REACT_APP_PORTAL_AUTH_CLIENT_ID` value.
 - `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server. 
 
-## Deployment
+## Client Setup
 
-TODO
+In general, the preferred design pattern is to have pure functions provided by microservices in compositions.  However, there are times where it is appropriate for one service to directly call another service as its client, thus forming more of a peer-to-peer network of services.
+
+This template provides such a client setup for your convenience, as there is some nuance involved to properly deal with security.  Simply specify the `CKG_ENDPOINT_URL` environment variable for the service you wish to call.
 
 ## Logging
 
