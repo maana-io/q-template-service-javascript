@@ -32,9 +32,32 @@ TODO
 
 TODO
 
+### Timeouts
+
+Node has a default request timeout of 2 minutes. One way to override this is by using the `setTimout(msecs: number, callback?: () => void)` ([link](https://nodejs.org/api/http.html#http_response_settimeout_msecs_callback)) method on the response object when setting middleware for the Express server.
+
+```javascript
+const requestTimeout = 1200000 // 20 minutes
+app.use((req, res, next) => {
+  res.setTimeout(requestTimeout, () => {
+    res.status(408)
+    res.send('408: Request Timeout: Service aborted your connection')
+  })
+  next()
+})
+
+// Continue setting middleware
+// ...
+
+app.get('/', (req, res) => {
+  // ...
+})
+```
+
 ### Authentication
 
 Authentication is handled against a Maana Q instance using a 'client credentials grant' OAuth flow.
+
 The .env.template file contains the variables that must be configured:
 
 - `REACT_APP_PORTAL_AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
