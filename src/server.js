@@ -2,7 +2,6 @@
 // External imports
 //
 
-// load .env into process.env.*
 // routing engine
 import express from 'express'
 // middleware to allow cross-origin requests
@@ -16,11 +15,6 @@ import glue from 'schemaglue'
 import path from 'path'
 import http from 'http'
 import request from 'request-promise-native'
-const querystring = require('querystring');
-
-//
-// Internal imports
-//
 import {
   log,
   print,
@@ -28,6 +22,8 @@ import {
   counter,
   BuildGraphqlClient
 } from 'io.maana.shared'
+import querystring from 'querystring'
+// load .env into process.env.*
 require('dotenv').config()
 
 const options = {
@@ -115,14 +111,19 @@ initMetrics(SELF.replace(/[\W_]+/g, ''))
 const graphqlRequestCounter = counter('graphqlRequests', 'it counts')
 
 const initServer = async options => {
-  let { httpAuthMiddleware, socketAuthMiddleware } = options
+  const { httpAuthMiddleware, socketAuthMiddleware } = options
 
-  let socketMiddleware = socketAuthMiddleware || defaultSocketMiddleware
+  const socketMiddleware = socketAuthMiddleware || defaultSocketMiddleware
 
   const server = new ApolloServer({
     schema,
     subscriptions: {
       onConnect: socketMiddleware
+    },
+    context: async ({ req }) => {
+      return {
+        client
+      }
     }
   })
 
@@ -134,12 +135,15 @@ const initServer = async options => {
   server.installSubscriptionHandlers(httpServer)
 
   httpServer.listen({ port: PORT }, async () => {
-    log(SELF).info(`listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`)
+    log(SELF).info(
+      `listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`
+    )
 
     // Create OIDC token URL for the specified auth provider (default to auth0).
-    const tokenUri = (process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak')
-      ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
-      : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
+    const tokenUri =
+      process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak'
+        ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
+        : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
 
     const form = {
       grant_type: 'client_credentials',
