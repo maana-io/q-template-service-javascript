@@ -16,7 +16,7 @@ import glue from 'schemaglue'
 import path from 'path'
 import http from 'http'
 import request from 'request-promise-native'
-const querystring = require('querystring');
+const querystring = require('querystring')
 
 //
 // Internal imports
@@ -123,7 +123,10 @@ const initServer = async options => {
     schema,
     subscriptions: {
       onConnect: socketMiddleware
-    }
+    },
+    context: () => ({
+      client
+    })
   })
 
   server.applyMiddleware({
@@ -134,12 +137,15 @@ const initServer = async options => {
   server.installSubscriptionHandlers(httpServer)
 
   httpServer.listen({ port: PORT }, async () => {
-    log(SELF).info(`listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`)
+    log(SELF).info(
+      `listening on ${print.external(`http://${HOSTNAME}:${PORT}/graphql`)}`
+    )
 
     // Create OIDC token URL for the specified auth provider (default to auth0).
-    const tokenUri = (process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak')
-      ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
-      : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
+    const tokenUri =
+      process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak'
+        ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
+        : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
 
     const form = {
       grant_type: 'client_credentials',
