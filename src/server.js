@@ -2,32 +2,29 @@
 // External imports
 //
 
-// load .env into process.env.*
-// routing engine
-import express from 'express'
-// middleware to allow cross-origin requests
-import cors from 'cors'
+import {
+  BuildGraphqlClient,
+  counter,
+  initMetrics,
+  log,
+  print
+} from 'io.maana.shared'
+
 // middleware to support GraphQL
 import { ApolloServer } from 'apollo-server-express'
-// GraphQL schema compilation
-import { makeExecutableSchema } from 'graphql-tools'
+// middleware to allow cross-origin requests
+import cors from 'cors'
+// routing engine
+import express from 'express'
 // Keep GraphQL stuff nicely factored
 import glue from 'schemaglue'
-import path from 'path'
 import http from 'http'
+// GraphQL schema compilation
+import { makeExecutableSchema } from 'graphql-tools'
+import path from 'path'
+import querystring from 'querystring'
 import request from 'request-promise-native'
-const querystring = require('querystring')
-
-//
-// Internal imports
-//
-import {
-  log,
-  print,
-  initMetrics,
-  counter,
-  BuildGraphqlClient
-} from 'io.maana.shared'
+// load .env into process.env.*
 require('dotenv').config()
 
 const options = {
@@ -115,18 +112,20 @@ initMetrics(SELF.replace(/[\W_]+/g, ''))
 const graphqlRequestCounter = counter('graphqlRequests', 'it counts')
 
 const initServer = async options => {
-  let { httpAuthMiddleware, socketAuthMiddleware } = options
+  const { httpAuthMiddleware, socketAuthMiddleware } = options
 
-  let socketMiddleware = socketAuthMiddleware || defaultSocketMiddleware
+  const socketMiddleware = socketAuthMiddleware || defaultSocketMiddleware
 
   const server = new ApolloServer({
     schema,
     subscriptions: {
       onConnect: socketMiddleware
     },
-    context: () => ({
-      client
-    })
+    context: async ({ req }) => {
+      return {
+        client
+      }
+    }
   })
 
   server.applyMiddleware({
