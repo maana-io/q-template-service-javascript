@@ -2,27 +2,28 @@
 // External imports
 //
 
-// routing engine
-import express from 'express'
-// middleware to allow cross-origin requests
-import cors from 'cors'
+import {
+  BuildGraphqlClient,
+  counter,
+  initMetrics,
+  log,
+  print
+} from 'io.maana.shared'
+
 // middleware to support GraphQL
 import { ApolloServer } from 'apollo-server-express'
-// GraphQL schema compilation
-import { makeExecutableSchema } from 'graphql-tools'
+// middleware to allow cross-origin requests
+import cors from 'cors'
+// routing engine
+import express from 'express'
 // Keep GraphQL stuff nicely factored
 import glue from 'schemaglue'
-import path from 'path'
 import http from 'http'
-import request from 'request-promise-native'
-import {
-  log,
-  print,
-  initMetrics,
-  counter,
-  BuildGraphqlClient
-} from 'io.maana.shared'
+// GraphQL schema compilation
+import { makeExecutableSchema } from 'graphql-tools'
+import path from 'path'
 import querystring from 'querystring'
+import request from 'request-promise-native'
 // load .env into process.env.*
 require('dotenv').config()
 

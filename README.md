@@ -100,6 +100,57 @@ This template provides such a client setup for your convenience, as there is som
     },
 ```
 
+### Location of the code
+
+Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method.  To see an example in the template open `src/server.js` and find the  `clientSetup` function, it creates a GraphQL client with authentication built into it.
+
+With the environment variables setup, then you can make calls to `client.query`, `client.mutate`, or `client.execute` to call the endpoint defined in `CKG_ENDPOINT_URL`.  This client is also passed into the context for each request, and can be accessed in the resolvers using the context.
+
+### Examples
+
+```js
+import gql from 'gql-tag'
+
+const PersonNameQuery = gql`
+  query($id: ID!) {
+    person(id: $id) {
+      name
+    }
+  }
+`
+
+const AddPersonMutation = gql`
+  mutate($input: AddPersonInput!) {
+    addPerson(input: $input)
+  }
+`
+
+export const resolver = {
+  Query: {
+    user: async (root, { id }, context) => {
+      // Using the client to call a query on an external GraphQL API
+      return await context.client.query({
+        query: PersonNameQuery,
+        variables: { id }
+      })
+    }
+  },
+  Mutation: {
+    addUser: async (root, { input }, context) => {
+      // Using the client to call a mutation on an external GraphQL API
+      return await context.client.mutate({
+        mutation: AddPersonMutation,
+        variables: {name: "Some Persons Name"}
+      })
+    }
+  }
+}
+```
+
+## Making the Service Require Authentication
+
+TODO
+
 ## Logging
 
 In some attempt to provide coherent and standard logging, I developed at least a funnel through which we could eventually connect proper logging. (There are several good ones, but we need to coordinate our selection with the containerization and deployment models involved.)
