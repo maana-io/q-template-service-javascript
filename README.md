@@ -60,9 +60,52 @@ The .env.template file contains the variables that must be configured:
 
 - `REACT_APP_PORTAL_AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
 - `REACT_APP_PORTAL_AUTH_DOMAIN` is the HTTP domain for the auth server. When setting this value, it is expected that keycloak domains are prefixed with an `https://`, and Auth0 domains are not, e.g. `maana.auth0.com`.
-- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server. 
+- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server.
 - `REACT_APP_PORTAL_AUTH_CLIENT_SECRET` is the secret that corresponds to the `REACT_APP_PORTAL_AUTH_CLIENT_ID` value.
-- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server. 
+- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server.
+
+### Calling an Authenticated Endpoint
+It is common in production to need to access an authenticated endpoint from your service.  Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method.  To see an example in the template open `src/server.js` and find the  `clientSetup` function, it creates a GraphQL client with authentication built into it.  Change `CKG_ENDPOINT_URL` to be the URL of the endpoint you want to hit, and then make calls to `client.mutate`, `client.query`, or `client.execute` to call the endpoint.
+
+#### Examples
+
+**Querying**
+```js
+import gql from 'gql-tag'
+
+const PersonNameQuery = gql`
+  query($id: ID!) {
+    person(id: $id) {
+      name
+    }
+  }
+`
+
+const res = await client.query({
+  query: PersonNameQuery,
+  variables: {id: "<some id>"}
+})
+```
+
+**Mutating**
+```js
+import gql from 'gql-tag'
+
+const AddPersonMutation = gql`
+  mutate($input: AddPersonInput!) {
+    addPerson(input: $input)
+  }
+`
+
+const res = await client.mutate({
+  mutation: AddPersonMutation,
+  variables: {name: "Some Persons Name"}
+})
+```
+
+### Making the Service Require Authentication
+
+TODO
 
 ## Client Setup
 
