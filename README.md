@@ -6,7 +6,7 @@ TODO
 
 ## Customization
 
-* Change the name and description of the module
+- Change the name and description of the module
 
 In `package.json`, edit the metadata:
 
@@ -21,8 +21,8 @@ In `package.json`, edit the metadata:
   "repository": "https://github.com/acme-inc/my-amazing-service.git",
 ```
 
-* Edit the `.env` file to reflect proper `PORT`, `SERVICE_ID`, and other service-specific parameters.
-* Define your public-facing schema in folders under the GraphQL subfolder as a schema file (.gql) and a resolver (.js).
+- Edit the `.env` file to reflect proper `PORT`, `SERVICE_ID`, and other service-specific parameters.
+- Define your public-facing schema in folders under the GraphQL subfolder as a schema file (.gql) and a resolver (.js).
 
 ## Build setup
 
@@ -55,20 +55,50 @@ app.get('/', (req, res) => {
 ```
 
 ### Authentication
+
 Authentication is handled against a Maana Q instance using a 'client credentials grant' OAuth flow.
+
 The .env.template file contains the variables that must be configured:
 
 - `REACT_APP_PORTAL_AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
 - `REACT_APP_PORTAL_AUTH_DOMAIN` is the HTTP domain for the auth server. When setting this value, it is expected that keycloak domains are prefixed with an `https://`, and Auth0 domains are not, e.g. `maana.auth0.com`.
-- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server. 
+- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server.
 - `REACT_APP_PORTAL_AUTH_CLIENT_SECRET` is the secret that corresponds to the `REACT_APP_PORTAL_AUTH_CLIENT_ID` value.
-- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server. 
+- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server.
 
 ## Client Setup
 
-In general, the preferred design pattern is to have pure functions provided by microservices in compositions.  However, there are times where it is appropriate for one service to directly call another service as its client, thus forming more of a peer-to-peer network of services.
+In general, the preferred design pattern is to have pure functions provided by microservices in compositions. However, there are times where it is appropriate for one service to directly call another service as its client, thus forming more of a peer-to-peer network of services.
 
-This template provides such a client setup for your convenience, as there is some nuance involved to properly deal with security.  Simply specify the `CKG_ENDPOINT_URL` environment variable for the service you wish to call.
+This template provides such a client setup for your convenience, as there is some nuance involved to properly deal with security. Simply specify the `CKG_ENDPOINT_URL` environment variable for the service you wish to call.
+
+```
+    info: async (_, args, { client }) => {
+      try {
+        const query = gql`
+          query info {
+            info {
+              id
+            }
+          }
+        `
+        const {
+          data: {
+            info: { id }
+          }
+        } = await client.query({ query })
+
+        return {
+          id: 'e5614056-8aeb-4008-b0dc-4f958a9b753a',
+          name: 'io.maana.template',
+          description: `Maana Q Knowledge Service template using ${id}`
+        }
+      } catch (e) {
+        console.log('Wxception:', e)
+        throw e
+      }
+    },
+```
 
 ## Logging
 
@@ -76,19 +106,19 @@ In some attempt to provide coherent and standard logging, I developed at least a
 
 But instead of adding 'console.log', it is suggested to use the `io.maana.shared` utility: `log` [(source code)](/repo/ksvcs/packages/maana-shared/src/log.js), which provides a simple wrapper providing:
 
-* a uniform log output format
-  * module identity: `id`
-  * time?
-  * level (`info`,`warn`,`error`)
-  * formatted values and indicators
-* semantic argument formatters
-  * module identity: `id`
-  * `external` data (e.g., names)
-  * `internal` data (e.g., uuids)
-  * `info` data (i.e., values)
-  * `true` and `false` and `bool` values
-  * `json` objects
-* colorization using [chalk](https://github.com/chalk/chalk)
+- a uniform log output format
+  - module identity: `id`
+  - time?
+  - level (`info`,`warn`,`error`)
+  - formatted values and indicators
+- semantic argument formatters
+  - module identity: `id`
+  - `external` data (e.g., names)
+  - `internal` data (e.g., uuids)
+  - `info` data (i.e., values)
+  - `true` and `false` and `bool` values
+  - `json` objects
+- colorization using [chalk](https://github.com/chalk/chalk)
 
 ### Setup
 
