@@ -24,6 +24,7 @@ import { makeExecutableSchema } from 'graphql-tools'
 import path from 'path'
 import querystring from 'querystring'
 import request from 'request-promise-native'
+
 // load .env into process.env.*
 require('dotenv').config()
 
@@ -50,7 +51,7 @@ export const schema = makeExecutableSchema({
 //
 let client
 const clientSetup = token => {
-  if (!client) {
+  if (!client && CKG_ENDPOINT_URL) {
     // construct graphql client using endpoint and context
     client = BuildGraphqlClient(CKG_ENDPOINT_URL, (_, { headers }) => {
       // return the headers to the context so httpLink can read them
@@ -141,30 +142,34 @@ const initServer = async options => {
     )
 
     // Create OIDC token URL for the specified auth provider (default to auth0).
-    const tokenUri =
-      process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak'
-        ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
-        : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
+    let token
+    if (process.env.REACT_APP_PORTAL_AUTH_DOMAIN) {
+      const tokenUri =
+        process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak'
+          ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
+          : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
 
-    const form = {
-      grant_type: 'client_credentials',
-      client_id: process.env.REACT_APP_PORTAL_AUTH_CLIENT_ID,
-      client_secret: process.env.REACT_APP_PORTAL_AUTH_CLIENT_SECRET,
-      audience: process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER
+      const form = {
+        grant_type: 'client_credentials',
+        client_id: process.env.REACT_APP_PORTAL_AUTH_CLIENT_ID,
+        client_secret: process.env.REACT_APP_PORTAL_AUTH_CLIENT_SECRET,
+        audience: process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER
+      }
+      const formData = querystring.stringify(form)
+      const contentLength = formData.length
+      const requestConfig = {
+        headers: {
+          'Content-Length': contentLength,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        uri: tokenUri,
+        body: formData,
+        method: 'POST'
+      }
+      const response = JSON.parse(await request(requestConfig))
+      token = response.access_token
     }
-    const formData = querystring.stringify(form)
-    const contentLength = formData.length
-    const requestConfig = {
-      headers: {
-        'Content-Length': contentLength,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      uri: tokenUri,
-      body: formData,
-      method: 'POST'
-    }
-    const response = JSON.parse(await request(requestConfig))
-    clientSetup(response.access_token)
+    clientSetup(token)
   })
 }
 
