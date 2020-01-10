@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.7.7",
-    "amqplib": "^0.5.5",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link-context": "^1.0.19",
@@ -40,7 +39,6 @@
     "graphql-tools": "^4.0.6",
     "io.maana.shared": "3.1.4-release",
     "jwks-rsa": "^1.6.0",
-    "maana-amqp-pubsub": "0.1.5",
     "node-fetch": "^2.6.0",
     "schemaglue": "^4.0.4",
     "subscriptions-transport-ws": "^0.9.16",

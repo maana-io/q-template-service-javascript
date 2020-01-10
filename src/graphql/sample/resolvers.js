@@ -1,12 +1,13 @@
-import uuid from 'uuid'
-import pubsub from '../../pubsub'
-import { gql } from 'apollo-server-express'
-
 import { log, print } from 'io.maana.shared'
+
+import { gql } from 'apollo-server-express'
+import pubsub from '../../pubsub'
+import uuid from 'uuid'
 
 require('dotenv').config()
 
-const SELF = process.env.SERVICE_ID || 'io.maana.template'
+const SERVICE_ID = process.env.SERVICE_ID
+const SELF = SERVICE_ID || 'io.maana.template'
 
 // dummy in-memory store
 const people = {}
@@ -14,28 +15,36 @@ const people = {}
 export const resolver = {
   Query: {
     info: async (_, args, { client }) => {
-      try {
-        const query = gql`
-          query info {
-            info {
-              id
-            }
-          }
-        `
-        const {
-          data: {
-            info: { id }
-          }
-        } = await client.query({ query })
+      let remoteId = SERVICE_ID
 
-        return {
-          id: 'e5614056-8aeb-4008-b0dc-4f958a9b753a',
-          name: 'io.maana.template',
-          description: `Maana Q Knowledge Service template using ${id}`
+      try {
+        if (client) {
+          const query = gql`
+            query info {
+              info {
+                id
+              }
+            }
+          `
+          const {
+            data: {
+              info: { id }
+            }
+          } = await client.query({ query })
+          remoteId = id
         }
       } catch (e) {
-        console.log('Wxception:', e)
-        throw e
+        log(SELF).error(
+          `Info Resolver failed with Exception: ${e.message}\n${print.external(
+            e.stack
+          )}`
+        )
+      }
+
+      return {
+        id: SERVICE_ID,
+        name: 'io.maana.template',
+        description: `Maana Q Knowledge Service template using ${remoteId}`
       }
     },
     allPeople: async () => Object.values(people),
