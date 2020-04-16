@@ -1,14 +1,3 @@
-# Scalars
-scalar Date
-scalar JSON
-
-# Boilerplate
-type Info {
-  id: ID!
-  name: String!
-  description: String
-}
-
 # Custom Types
 type Person {
   # Kind fields
@@ -30,9 +19,6 @@ input PersonInput {
 
 # Query Root
 type Query {
-  # Boilerplate
-  info: Info
-
   # Custom queries
   allPeople: [Person!]!
   person(id: ID!): Person

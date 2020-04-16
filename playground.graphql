@@ -1,0 +1,28 @@
+query info {
+  info {
+    id
+    name
+    version
+    description
+  }
+}
+
+mutation addPerson {
+  addPerson(
+    input: {
+      id: 0
+      givenName: "alice"
+      familyName: "toklas"
+      dateOfBirth: "April 30, 1877"
+    }
+  )
+}
+
+query allPeople {
+  allPeople {
+    id
+    givenName
+    familyName
+    dateOfBirth
+  }
+}

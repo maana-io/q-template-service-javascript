@@ -1,10 +1,16 @@
 # NodeJs-based Maana Q Knowledge Microservice Template
 
+This is a tempalate project for creating GraphQL endpoint optimized for Maana Q. It provides everything you need to quickly create a GraphQL schema, provide resolvers, dockerize, and deploy to a Kubernetes cluster.
+
 ## Layout
 
-TODO
+All source code is in `src/`.
+
+GraphQL schema and resolvers are kept in separate directories under `src/graphql`.
 
 ## Customization
+
+You should only need to worry about changing the `package.json` and `Dockerfile` descriptions and your GraphQL schema and resolvers. There should be **no need** to touch the `server.js`, `start.dev.js`, or `pubsub.js`, as these are configured to run the service and provide compatibility with Maana Q.
 
 - Change the name and description of the module
 
@@ -24,15 +30,33 @@ In `package.json`, edit the metadata:
 - Edit the `.env` file to reflect proper `PORT`, `SERVICE_ID`, and other service-specific parameters.
 - Define your public-facing schema in folders under the GraphQL subfolder as a schema file (.gql) and a resolver (.js).
 
-## Build setup
+## Local build and development
 
-TODO
+```bash
+npm i
+npm run dev
+```
 
-## Server setup
+## Local docker build and execution
 
-TODO
+```bash
+npm run docker-build
+npm run docker-run
+```
 
-### Timeouts
+## Deploy
+
+Use the Maana GraphQL CLI commands to deploy to your Maana Kubernetes cluster:
+
+```bash
+# Install the GraphQL CLI and Maana commands
+npm i -g graphql-cli graphql-cli-maana
+
+# Use the Maana deployment command and follow the interactive prompts
+gql mdeploy
+```
+
+## Timeouts
 
 Node has a default request timeout of 2 minutes. One way to override this is by using the `setTimout(msecs: number, callback?: () => void)` ([link](https://nodejs.org/api/http.html#http_response_settimeout_msecs_callback)) method on the response object when setting middleware for the Express server.
 
@@ -54,7 +78,7 @@ app.get('/', (req, res) => {
 })
 ```
 
-### Authentication
+## Authentication
 
 Authentication is handled against a Maana Q instance using a 'client credentials grant' OAuth flow.
 
@@ -102,11 +126,48 @@ This template provides such a client setup for your convenience, as there is som
 
 ### Location of the code
 
-Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method.  To see an example in the template open `src/server.js` and find the  `clientSetup` function, it creates a GraphQL client with authentication built into it.
+Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method. To see an example in the template open `src/server.js` and find the `clientSetup` function, it creates a GraphQL client with authentication built into it.
 
-With the environment variables setup, then you can make calls to `client.query`, `client.mutate`, or `client.execute` to call the endpoint defined in `CKG_ENDPOINT_URL`.  This client is also passed into the context for each request, and can be accessed in the resolvers using the context.
+With the environment variables setup, then you can make calls to `client.query`, `client.mutate`, or `client.execute` to call the endpoint defined in `CKG_ENDPOINT_URL`. This client is also passed into the context for each request, and can be accessed in the resolvers using the context.
 
-### Examples
+## Examples using the provided sample
+
+### GraphiQL
+
+(See `playground.graphql`)
+
+```graphql
+query info {
+  info {
+    id
+    name
+    version
+    description
+  }
+}
+
+mutation addPerson {
+  addPerson(
+    input: {
+      id: 0
+      givenName: "alice"
+      familyName: "toklas"
+      dateOfBirth: "April 30, 1877"
+    }
+  )
+}
+
+query allPeople {
+  allPeople {
+    id
+    givenName
+    familyName
+    dateOfBirth
+  }
+}
+```
+
+### From JavaScript
 
 ```js
 import gql from 'gql-tag'
@@ -131,25 +192,21 @@ export const resolver = {
       // Using the client to call a query on an external GraphQL API
       return await context.client.query({
         query: PersonNameQuery,
-        variables: { id }
+        variables: { id },
       })
-    }
+    },
   },
   Mutation: {
     addUser: async (root, { input }, context) => {
       // Using the client to call a mutation on an external GraphQL API
       return await context.client.mutate({
         mutation: AddPersonMutation,
-        variables: {name: "Some Persons Name"}
+        variables: { name: 'Some Persons Name' },
       })
-    }
-  }
+    },
+  },
 }
 ```
-
-## Making the Service Require Authentication
-
-TODO
 
 ## Logging
 
@@ -170,19 +227,6 @@ But instead of adding 'console.log', it is suggested to use the `io.maana.shared
   - `true` and `false` and `bool` values
   - `json` objects
 - colorization using [chalk](https://github.com/chalk/chalk)
-
-### Setup
-
-At the top of your `.js` file:
-
-```javascript
-import { log, print } from 'io.maana.shared'
-
-// Module identity (whoami)
-const SELF = (process.env.SERVICE_ID || 'io.maana.portal') + '.pubsub'
-```
-
-This is boilerplate for all Maana knowledge Services.
 
 ### Examples
 
@@ -207,31 +251,3 @@ log(SELF).info(
   )}` + (partIndex ? ` part: ${print.info(partIndex)}` : '')
 )
 ```
-
-# Deploying the Service
-
-## Prerequisits
-
-You need to have Docker installed and running on your machine.
-
-## Log into the Azure Container Registery
-
-    docker login --username [USER_NAME] --password [PASSWORD] [ACR_NAME].azurecr.io
-
-## Build and tag the Docker image
-
-    docker build --tag=[ACR_NAME].azurecr.io/[SERVICE_NAME]:[VERSION]
-
-Make sure you assign a _unique_ name and version to your image.
-
-## Push your image into ACR
-
-    docker push [ACR_NAME].azurecr.io/[SERVICE_NAME]:[VERSION]
-
-## Run an instance of your application
-
-1. In the ACR interface in the Azure Portal, click on `Reposetories`
-2. Click on the name of your image. The version tag of your image will appear.
-3. Click on the elipses (...) on the right side of the version tag.
-4. Click on "Run Instance"
-5. Provide the required information to spin up the instance. You'll be required to provide a name, resource group and port. The port should match the one used in your Dockerfile (8050)

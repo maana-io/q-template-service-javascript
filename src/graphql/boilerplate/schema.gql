@@ -1,0 +1,17 @@
+# Scalars
+scalar Date
+scalar JSON
+
+# Boilerplate
+type Info {
+  id: ID!
+  name: String!
+  version: String!
+  description: String
+}
+
+# Query Root
+type Query {
+  # Boilerplate
+  info: Info
+}
