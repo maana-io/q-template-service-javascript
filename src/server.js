@@ -163,17 +163,17 @@ const initServer = async options => {
 
     // Create OIDC token URL for the specified auth provider (default to auth0).
     let token
-    if (process.env.REACT_APP_PORTAL_AUTH_DOMAIN) {
+    if (process.env.AUTH_DOMAIN) {
       const tokenUri =
-        process.env.REACT_APP_PORTAL_AUTH_PROVIDER === 'keycloak'
-          ? `${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/auth/realms/${process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER}/protocol/openid-connect/token`
-          : `https://${process.env.REACT_APP_PORTAL_AUTH_DOMAIN}/oauth/token`
+        process.env.AUTH_PROVIDER === 'keycloak'
+          ? `${process.env.AUTH_DOMAIN}/auth/realms/${process.env.AUTH_IDENTIFIER}/protocol/openid-connect/token`
+          : `https://${process.env.AUTH_DOMAIN}/oauth/token`
 
       const form = {
         grant_type: 'client_credentials',
-        client_id: process.env.REACT_APP_PORTAL_AUTH_CLIENT_ID,
-        client_secret: process.env.REACT_APP_PORTAL_AUTH_CLIENT_SECRET,
-        audience: process.env.REACT_APP_PORTAL_AUTH_IDENTIFIER
+        client_id: process.env.AUTH_CLIENT_ID,
+        client_secret: process.env.AUTH_CLIENT_SECRET,
+        audience: process.env.AUTH_IDENTIFIER
       }
       const formData = querystring.stringify(form)
       const contentLength = formData.length

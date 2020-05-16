@@ -60,11 +60,11 @@ Authentication is handled against a Maana Q instance using a 'client credentials
 
 The .env.template file contains the variables that must be configured:
 
-- `REACT_APP_PORTAL_AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
-- `REACT_APP_PORTAL_AUTH_DOMAIN` is the HTTP domain for the auth server. When setting this value, it is expected that keycloak domains are prefixed with an `https://`, and Auth0 domains are not, e.g. `maana.auth0.com`.
-- `REACT_APP_PORTAL_AUTH_CLIENT_ID` is client ID being used in the auth server.
-- `REACT_APP_PORTAL_AUTH_CLIENT_SECRET` is the secret that corresponds to the `REACT_APP_PORTAL_AUTH_CLIENT_ID` value.
-- `REACT_APP_PORTAL_AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server.
+- `AUTH_PROVIDER` must be set to either `keycloak` or `auth0`.
+- `AUTH_DOMAIN` is the HTTP domain for the auth server. When setting this value, it is expected that keycloak domains are prefixed with an `https://`, and Auth0 domains are not, e.g. `maana.auth0.com`.
+- `AUTH_CLIENT_ID` is client ID being used in the auth server.
+- `AUTH_CLIENT_SECRET` is the secret that corresponds to the `AUTH_CLIENT_ID` value.
+- `AUTH_IDENTIFIER` is used both as the keycloak realm or auth0 domain name, as well as the OAuth audience value, therefore these must already have been configured as the same value on the server.
 
 ## Client Setup
 
@@ -102,9 +102,9 @@ This template provides such a client setup for your convenience, as there is som
 
 ### Location of the code
 
-Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method.  To see an example in the template open `src/server.js` and find the  `clientSetup` function, it creates a GraphQL client with authentication built into it.
+Maana's shared library gives you an easy way to setup an authenticated graphql client for making requests using the `BuildGraphqlClient` method. To see an example in the template open `src/server.js` and find the `clientSetup` function, it creates a GraphQL client with authentication built into it.
 
-With the environment variables setup, then you can make calls to `client.query`, `client.mutate`, or `client.execute` to call the endpoint defined in `CKG_ENDPOINT_URL`.  This client is also passed into the context for each request, and can be accessed in the resolvers using the context.
+With the environment variables setup, then you can make calls to `client.query`, `client.mutate`, or `client.execute` to call the endpoint defined in `CKG_ENDPOINT_URL`. This client is also passed into the context for each request, and can be accessed in the resolvers using the context.
 
 ### Examples
 
@@ -140,7 +140,7 @@ export const resolver = {
       // Using the client to call a mutation on an external GraphQL API
       return await context.client.mutate({
         mutation: AddPersonMutation,
-        variables: {name: "Some Persons Name"}
+        variables: { name: 'Some Persons Name' }
       })
     }
   }
