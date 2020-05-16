@@ -14,6 +14,8 @@ import {
 import { ApolloServer } from 'apollo-server-express'
 // middleware to allow cross-origin requests
 import cors from 'cors'
+// middleware for parsing request content
+import bodyParser from 'body-parser'
 // routing engine
 import express from 'express'
 // Keep GraphQL stuff nicely factored
@@ -95,6 +97,24 @@ const corsOptions = {
 
 app.use(cors(corsOptions)) // enable all CORS requests
 app.options('*', cors()) // enable pre-flight for all routes
+
+const requestTimeout = 1200000 // 20 minutes
+app.use((req, res, next) => {
+  res.setTimeout(requestTimeout, () => {
+    res.status(408)
+    res.send('408: Request Timeout: Service aborted your connection')
+  })
+  next()
+})
+
+app.use(bodyParser.json({ limit: '50mb', extended: true }))
+app.use(
+  bodyParser.urlencoded({
+    parameterLimit: 100000,
+    limit: '50mb',
+    extended: true
+  })
+)
 
 app.get('/', (req, res) => {
   res.send(`${SELF}\n`)
